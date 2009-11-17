@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <deploymentStatus>Deployed</deploymentStatus>
+    <description>Direct Receipts for Integration Rules Example in Trialforce</description>
+    <fields>
+        <fullName>Account_Payment_Method__c</fullName>
+        <label>Account Payment Method</label>
+        <length>10</length>
+        <type>Text</type>
+    </fields>
+    <fields>
+        <fullName>Account_Reference__c</fullName>
+        <label>Account Reference</label>
+        <length>20</length>
+        <type>Text</type>
+    </fields>
+    <fields>
+        <fullName>Bank_Account__c</fullName>
+        <label>Bank Account</label>
+        <referenceTo>c2g__codaBankAccount__c</referenceTo>
+        <relationshipLabel>Direct Receipt&apos;s</relationshipLabel>
+        <relationshipName>Direct_Receipt_s</relationshipName>
+        <type>Lookup</type>
+    </fields>
+    <fields>
+        <fullName>Cash_Entry_Number__c</fullName>
+        <label>Cash Entry Number</label>
+        <length>9</length>
+        <type>Text</type>
+    </fields>
+    <fields>
+        <fullName>Customer_Account__c</fullName>
+        <label>Customer Account</label>
+        <referenceTo>Account</referenceTo>
+        <relationshipLabel>Direct Receipt&apos;s</relationshipLabel>
+        <relationshipName>Direct_Receipt_s</relationshipName>
+        <type>Lookup</type>
+    </fields>
+    <fields>
+        <fullName>Date__c</fullName>
+        <label>Date</label>
+        <type>Date</type>
+    </fields>
+    <fields>
+        <fullName>Payment_Currency__c</fullName>
+        <label>Payment Currency</label>
+        <length>3</length>
+        <type>Text</type>
+    </fields>
+    <fields>
+        <fullName>Payment_Method__c</fullName>
+        <label>Payment Method</label>
+        <picklist>
+            <picklistValues>
+                <fullName>Cash</fullName>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>Check</fullName>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>Electronic</fullName>
+                <default>false</default>
+            </picklistValues>
+            <sorted>false</sorted>
+        </picklist>
+        <type>Picklist</type>
+    </fields>
+    <fields>
+        <fullName>Payment_Value__c</fullName>
+        <label>Payment Value</label>
+        <precision>18</precision>
+        <scale>2</scale>
+        <type>Number</type>
+    </fields>
+    <fields>
+        <fullName>Processed_Indicator__c</fullName>
+        <defaultValue>false</defaultValue>
+        <label>Processed Indicator</label>
+        <type>Checkbox</type>
+    </fields>
+    <fields>
+        <fullName>Receipt_Currency__c</fullName>
+        <label>Receipt Currency</label>
+        <length>3</length>
+        <type>Text</type>
+    </fields>
+    <fields>
+        <fullName>Reference__c</fullName>
+        <label>Reference</label>
+        <length>80</length>
+        <type>Text</type>
+    </fields>
+    <label>Direct Receipt</label>
+    <listViews>
+        <fullName>All</fullName>
+        <filterScope>Everything</filterScope>
+        <label>All</label>
+    </listViews>
+    <nameField>
+        <displayFormat>DIR{000000}</displayFormat>
+        <label>Direct Receipt Number</label>
+        <type>AutoNumber</type>
+    </nameField>
+    <pluralLabel>Direct Receipt&apos;s</pluralLabel>
+    <searchLayouts/>
+    <sharingModel>ReadWrite</sharingModel>
+</CustomObject>

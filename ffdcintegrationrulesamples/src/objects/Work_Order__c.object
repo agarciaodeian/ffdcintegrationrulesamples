@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <deploymentStatus>Deployed</deploymentStatus>
+    <description>Consulting Work Order Custom Object (Not a standard FinancialForce Object)</description>
+    <enableActivities>true</enableActivities>
+    <enableReports>true</enableReports>
+    <fields>
+        <fullName>Completion_Date__c</fullName>
+        <label>Completion Date</label>
+        <type>Date</type>
+    </fields>
+    <fields>
+        <fullName>Consultant__c</fullName>
+        <label>Consultant</label>
+        <picklist>
+            <picklistValues>
+                <fullName>Abbi Lopez</fullName>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>Ed Collins</fullName>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>Lee Gray</fullName>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>Sherri Pinkham</fullName>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>Steve Bradski</fullName>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>Kirk Cameron</fullName>
+                <default>false</default>
+            </picklistValues>
+            <sorted>false</sorted>
+        </picklist>
+        <type>Picklist</type>
+    </fields>
+    <fields>
+        <fullName>Customer_Account__c</fullName>
+        <label>Customer Account</label>
+        <referenceTo>Account</referenceTo>
+        <relationshipLabel>Work Orders</relationshipLabel>
+        <relationshipName>Work_Orders</relationshipName>
+        <type>Lookup</type>
+    </fields>
+    <fields>
+        <fullName>Customer_Reference__c</fullName>
+        <description>Customer reference for example order number, job number, representative&apos;s name</description>
+        <label>Customer Reference</label>
+        <length>40</length>
+        <type>Text</type>
+    </fields>
+    <fields>
+        <fullName>Date__c</fullName>
+        <label>Date</label>
+        <type>Date</type>
+    </fields>
+    <fields>
+        <fullName>Gross_Value__c</fullName>
+        <label>Gross Value</label>
+        <summarizedField>Work_Order_Line_Item__c.Gross_Value__c</summarizedField>
+        <summaryForeignKey>Work_Order_Line_Item__c.Work_Order__c</summaryForeignKey>
+        <summaryOperation>sum</summaryOperation>
+        <type>Summary</type>
+    </fields>
+    <fields>
+        <fullName>Invoiced__c</fullName>
+        <defaultValue>false</defaultValue>
+        <description>Indicates whether the Works Order has been invoiced</description>
+        <label>Invoiced</label>
+        <type>Checkbox</type>
+    </fields>
+    <fields>
+        <fullName>Net_Value__c</fullName>
+        <label>Net Value</label>
+        <summarizedField>Work_Order_Line_Item__c.Net_Value__c</summarizedField>
+        <summaryForeignKey>Work_Order_Line_Item__c.Work_Order__c</summaryForeignKey>
+        <summaryOperation>sum</summaryOperation>
+        <type>Summary</type>
+    </fields>
+    <fields>
+        <fullName>Sales_Invoice_Number__c</fullName>
+        <description>Sales Invoice Number</description>
+        <label>Sales Invoice Number</label>
+        <referenceTo>c2g__codaInvoice__c</referenceTo>
+        <relationshipLabel>Work Orders</relationshipLabel>
+        <relationshipName>Work_Orders</relationshipName>
+        <type>Lookup</type>
+    </fields>
+    <fields>
+        <fullName>Status__c</fullName>
+        <description>Status of the works order</description>
+        <label>Status</label>
+        <picklist>
+            <picklistValues>
+                <fullName>Open</fullName>
+                <default>true</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>In Progress</fullName>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>Complete</fullName>
+                <default>false</default>
+            </picklistValues>
+            <sorted>false</sorted>
+        </picklist>
+        <type>Picklist</type>
+    </fields>
+    <fields>
+        <fullName>Tax_Code_1__c</fullName>
+        <label>Tax Code 1</label>
+        <referenceTo>c2g__codaTaxCode__c</referenceTo>
+        <relationshipLabel>Work Orders</relationshipLabel>
+        <relationshipName>Work_Orders</relationshipName>
+        <type>Lookup</type>
+    </fields>
+    <fields>
+        <fullName>Tax_Code_2__c</fullName>
+        <label>Tax Code 2</label>
+        <referenceTo>c2g__codaTaxCode__c</referenceTo>
+        <relationshipLabel>Work Orders (Tax Code 2)</relationshipLabel>
+        <relationshipName>Work_Orders1</relationshipName>
+        <type>Lookup</type>
+    </fields>
+    <fields>
+        <fullName>Tax_Code_3__c</fullName>
+        <label>Tax Code 3</label>
+        <referenceTo>c2g__codaTaxCode__c</referenceTo>
+        <relationshipLabel>Work Orders (Tax Code 3)</relationshipLabel>
+        <relationshipName>Work_Orders2</relationshipName>
+        <type>Lookup</type>
+    </fields>
+    <fields>
+        <fullName>Tax_Rate_1__c</fullName>
+        <label>Tax Rate 1</label>
+        <precision>7</precision>
+        <scale>3</scale>
+        <type>Number</type>
+    </fields>
+    <fields>
+        <fullName>Tax_Rate_2__c</fullName>
+        <label>Tax Rate 2</label>
+        <precision>7</precision>
+        <scale>3</scale>
+        <type>Number</type>
+    </fields>
+    <fields>
+        <fullName>Tax_Rate_3__c</fullName>
+        <label>Tax Rate 3</label>
+        <precision>7</precision>
+        <scale>3</scale>
+        <type>Number</type>
+    </fields>
+    <fields>
+        <fullName>Tax_Value_1__c</fullName>
+        <label>Tax Value 1</label>
+        <summarizedField>Work_Order_Line_Item__c.Tax_Value_1__c</summarizedField>
+        <summaryForeignKey>Work_Order_Line_Item__c.Work_Order__c</summaryForeignKey>
+        <summaryOperation>sum</summaryOperation>
+        <type>Summary</type>
+    </fields>
+    <fields>
+        <fullName>Tax_Value_2__c</fullName>
+        <label>Tax Value 2</label>
+        <summarizedField>Work_Order_Line_Item__c.Tax_Value_2__c</summarizedField>
+        <summaryForeignKey>Work_Order_Line_Item__c.Work_Order__c</summaryForeignKey>
+        <summaryOperation>sum</summaryOperation>
+        <type>Summary</type>
+    </fields>
+    <fields>
+        <fullName>Tax_Value_3__c</fullName>
+        <label>Tax Value 3</label>
+        <summarizedField>Work_Order_Line_Item__c.Tax_Value_3__c</summarizedField>
+        <summaryForeignKey>Work_Order_Line_Item__c.Work_Order__c</summaryForeignKey>
+        <summaryOperation>sum</summaryOperation>
+        <type>Summary</type>
+    </fields>
+    <fields>
+        <fullName>Total_Tax__c</fullName>
+        <label>Total Tax</label>
+        <summarizedField>Work_Order_Line_Item__c.Total_Tax__c</summarizedField>
+        <summaryForeignKey>Work_Order_Line_Item__c.Work_Order__c</summaryForeignKey>
+        <summaryOperation>sum</summaryOperation>
+        <type>Summary</type>
+    </fields>
+    <label>Work Order</label>
+    <listViews>
+        <fullName>All</fullName>
+        <filterScope>Everything</filterScope>
+        <label>All</label>
+    </listViews>
+    <listViews>
+        <fullName>Works_Order_Status</fullName>
+        <columns>NAME</columns>
+        <columns>Date__c</columns>
+        <columns>Customer_Account__c</columns>
+        <columns>Consultant__c</columns>
+        <columns>CURRENCY_ISO_CODE</columns>
+        <columns>Customer_Reference__c</columns>
+        <columns>Status__c</columns>
+        <columns>Completion_Date__c</columns>
+        <filterScope>Everything</filterScope>
+        <label>Works Order Status</label>
+    </listViews>
+    <listViews>
+        <fullName>Works_Order_Values</fullName>
+        <columns>NAME</columns>
+        <columns>Customer_Account__c</columns>
+        <columns>CURRENCY_ISO_CODE</columns>
+        <columns>Tax_Code_1__c</columns>
+        <columns>Tax_Code_2__c</columns>
+        <columns>Tax_Code_3__c</columns>
+        <columns>Tax_Rate_1__c</columns>
+        <columns>Tax_Rate_2__c</columns>
+        <columns>Tax_Rate_3__c</columns>
+        <columns>Tax_Value_1__c</columns>
+        <columns>Tax_Value_2__c</columns>
+        <columns>Tax_Value_3__c</columns>
+        <columns>Net_Value__c</columns>
+        <columns>Total_Tax__c</columns>
+        <columns>Gross_Value__c</columns>
+        <filterScope>Everything</filterScope>
+        <label>Works Order Values</label>
+    </listViews>
+    <nameField>
+        <displayFormat>CWO{000000}</displayFormat>
+        <label>Work Order Name</label>
+        <type>AutoNumber</type>
+    </nameField>
+    <pluralLabel>Work Orders</pluralLabel>
+    <searchLayouts/>
+    <sharingModel>ReadWrite</sharingModel>
+    <webLinks>
+        <fullName>Create_Invoice</fullName>
+        <availability>online</availability>
+        <description>Create a Sales Invoice from a Work Order</description>
+        <displayType>button</displayType>
+        <linkType>javascript</linkType>
+        <masterLabel>Create Invoice</masterLabel>
+        <openType>onClickJavaScript</openType>
+        <protected>false</protected>
+        <url>{!REQUIRESCRIPT(&quot;/soap/ajax/11.0/connection.js&quot;)}
+{!REQUIRESCRIPT(&quot;/soap/ajax/11.0/apex.js&quot;)}
+var result = sforce.apex.execute(&quot;c2g.CODAIntegrationRuleWebService&quot;, &quot;createInvoiceFromSFObject&quot;, {intRuleName:&quot;Work Order Invoice&quot;,headerId:&quot;{!Work_Order__c.Id}&quot;});
+var resulttext = result.toString();
+var rtnval = resulttext.split(&quot;:&quot;);
+success=rtnval[0];
+if (success==&apos;true&apos;)
+{
+   id = rtnval[1];</url>
+    </webLinks>
+</CustomObject>

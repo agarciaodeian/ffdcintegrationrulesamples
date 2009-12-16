@@ -27,6 +27,64 @@ trigger WorkOrderDefaulting on Work_Order__c (before insert, before update, afte
 {
     if(Trigger.isBefore)
     {
+        // Load Accounts for given Work Orders
+        Map<ID, ID> accountIds = new Map<ID, ID>();
+        for(Work_Order__c workOrder : Trigger.new)
+            if(workOrder.Customer_Account__c!=null)
+                accountIds.put(workOrder.Customer_Account__c, workOrder.Customer_Account__c);
+        List<Account> accounts = 
+            [select Id, c2g__CODASalesTaxStatus__c, c2g__CODATaxCode1__c, c2g__CODATaxCode2__c, c2g__CODATaxCode3__c,
+            		c2g__CODABaseDate1__c, c2g__CODADaysOffset1__c, CurrencyISOCode 
+                from Account where Id in :accountIds.values()];
+        Map<ID, Account> accountById = new Map<ID, Account>();
+        List<String> isoCodes = new List<String>();
+        for(Account account : accounts)
+        {
+            accountById.put(account.Id, account);
+            isoCodes.add(account.CurrencyISOCode);
+        }
+        
+        // Load Account Currencies for given Accounts used by Work Orders
+        List<c2g__codaAccountingCurrency__c> accountCurrencies = 
+        	[select Id, Name from c2g__codaAccountingCurrency__c where Name in :isoCodes];
+        Map<String, c2g__codaAccountingCurrency__c> accountCurrencyMap = new Map<String, c2g__codaAccountingCurrency__c>();
+        for(c2g__codaAccountingCurrency__c accountCurrency : accountCurrencies)
+        	accountCurrencyMap.put(accountCurrency.Name, accountCurrency);
+        	
+    	// Invoice Date and Due Date
+        for(Work_Order__c workOrder : Trigger.new)
+        {
+        	// Default Invoice Date
+        	if(workOrder.Invoice_Date__c == null)
+        		workOrder.Invoice_Date__c = System.today();
+        	workOrder.Due_Date__c = workOrder.Invoice_Date__c;
+            Date invoiceDate = workOrder.Invoice_Date__c;
+        	// Account based defaulting?
+            if(workOrder.Customer_Account__c!=null)
+            {
+            	Account account = accountById.get(workOrder.Customer_Account__c);
+            	// Currency?
+            	if(workOrder.Invoice_Currency__c==null)
+            		if(accountCurrencyMap.containsKey(account.CurrencyISOCode))
+            			workOrder.Invoice_Currency__c = accountCurrencyMap.get(account.CurrencyISOCode).Id;
+            	// Caluculate Due Date based on Account?
+            	if(account.c2g__CODABaseDate1__c != null)
+            	{
+            		String baseDate = account.c2g__CODABaseDate1__c;
+            		Integer offsetdays = (account.c2g__CODADaysOffset1__c == null) 
+            			? 0 : account.c2g__CODADaysOffset1__c.intValue();
+            		workOrder.Due_Date__c = FFUtil.calculateDueDate(invoiceDate,baseDate,offsetdays);
+            	}
+            	else
+            	{
+		            // Calculate Due Date based on Company?
+		           	workOrder.Due_Date__c = FFUtil.calculateCompanyDueDate(invoiceDate);            		
+            	}
+            }                        
+           	// Period
+           	workOrder.Period__c = FFUtil.getPeriodIDByDate(invoiceDate);
+        }
+    	
 		// VAT
 		if(FFUtil.isCurrentCompanyVAT())
 		{
@@ -45,119 +103,104 @@ trigger WorkOrderDefaulting on Work_Order__c (before insert, before update, afte
 		// SUT
 		else
 		{
-	        if(Trigger.isUpdate || Trigger.isInsert)
-	        {
-	            // Load Accounts for given Work Orders
-	            Map<ID, ID> accountIds = new Map<ID, ID>();
-	            for(Work_Order__c workOrder : Trigger.new)
-	                if(workOrder.Customer_Account__c!=null)
-	                    accountIds.put(workOrder.Customer_Account__c, workOrder.Customer_Account__c);
-	            List<Account> accounts = 
-	                [select Id, c2g__CODASalesTaxStatus__c, c2g__CODATaxCode1__c, c2g__CODATaxCode2__c, c2g__CODATaxCode3__c 
-	                    from Account where Id in :accountIds.values()];
-	            Map<ID, Account> accountById = new Map<ID, Account>();
-	            for(Account account : accounts)
-	                accountById.put(account.Id, account);
-	                
-	            // Resolve Tax Codes
-	            Date minCompletionDate = null;
-	            Date maxCompletionDate = null;
-	            Map<ID, ID> taxCodeIds = new Map<ID, ID>();
-	            for(Work_Order__c workOrder : Trigger.new)
-	            {
-	                // Account? 
-	                if(workOrder.Customer_Account__c==null)
-	                {
-	                    // Clear tax codes if no account
-	                    workOrder.Tax_Code_1__c = null;
-	                    workOrder.Tax_Code_2__c = null;
-	                    workOrder.Tax_Code_3__c = null;
-	                    continue;           
-	                }       
-	                
-	                // Default Tax Codes from Account
-	                Account account = accountById.get(workOrder.Customer_Account__c);
-	                workOrder.Tax_Code_1__c = account.c2g__CODATaxCode1__c;
-	                workOrder.Tax_Code_2__c = account.c2g__CODATaxCode2__c;
-	                workOrder.Tax_Code_3__c = account.c2g__CODATaxCode3__c;
-	                // Log Tax Code ID's used
-	                if(workOrder.Tax_Code_1__c!=null)
-	                    taxCodeIds.put(workOrder.Tax_Code_1__c, workOrder.Tax_Code_1__c);
-	                if(workOrder.Tax_Code_2__c!=null)
-	                    taxCodeIds.put(workOrder.Tax_Code_2__c, workOrder.Tax_Code_2__c);
-	                if(workOrder.Tax_Code_3__c!=null)
-	                    taxCodeIds.put(workOrder.Tax_Code_3__c, workOrder.Tax_Code_3__c);
-	                    
-	                // Establish the range of completion dates in which to calculate tax for this batch
-	                if(workOrder.Completion_Date__c!=null)
-	                {
-	                    if(workOrder.Completion_Date__c < minCompletionDate)
-	                        minCompletionDate = workOrder.Completion_Date__c;
-	                    if(workOrder.Completion_Date__c > maxCompletionDate)
-	                        maxCompletionDate = workOrder.Completion_Date__c;               
-	                }
-	            }
-	            
-	            // Load applicable subset of Tax Rates to match against completion dates
-	            List<c2g__codaTaxCode__c> taxCodes = 
-	                [select Name, Id, 
-	                    (select Id, c2g__Rate__c, c2g__StartDate__c From c2g__TaxRates__r
-	                        where c2g__StartDate__c >= :minCompletionDate and
-	                              c2g__StartDate__c <= :maxCompletionDate 
-	                        order by c2g__StartDate__c desc) 
-	                    from c2g__codaTaxCode__c
-	                    where Id in :taxCodeIds.values()];
-	            Map<ID, c2g__codaTaxCode__c> taxCodesById = new Map<ID, c2g__codaTaxCode__c>();
-	            for(c2g__codaTaxCode__c taxCode : taxCodes)
-	                taxCodesById.put(taxCode.Id, taxCode);
-	                
-	            // Now caluclate tax rates
-	            for(Work_Order__c workOrder : Trigger.new)
-	            {
-	                // Default to zero 
-	                workOrder.Tax_Rate_1__c = 0;
-	                workOrder.Tax_Rate_2__c = 0;
-	                workOrder.Tax_Rate_3__c = 0;
-	                // Account? Or Tax Exempt Accounts?
-	                Account account = accountById.get(workOrder.Customer_Account__c);
-	                if(account==null || account.c2g__CODASalesTaxStatus__c == 'Exempt')
-	                    continue;
-	                // Resolve rate according to completion date of work item               
-	                if(workOrder.Tax_Code_1__c!=null)
-	                {
-	                    for(c2g__codaTaxRate__c taxRate : taxCodesById.get(workOrder.Tax_Code_1__c).c2g__TaxRates__r)
-	                    {
-	                        if(taxRate.c2g__StartDate__c <= workOrder.Completion_Date__c)
-	                        {
-	                             workOrder.Tax_Rate_1__c = taxRate.c2g__Rate__c;
-	                             break; 
-	                        }
-	                    }
-	                }
-	                if(workOrder.Tax_Code_2__c!=null)
-	                {
-	                    for(c2g__codaTaxRate__c taxRate : taxCodesById.get(workOrder.Tax_Code_2__c).c2g__TaxRates__r)
-	                    {
-	                        if(taxRate.c2g__StartDate__c <= workOrder.Completion_Date__c)
-	                        {
-	                             workOrder.Tax_Rate_2__c = taxRate.c2g__Rate__c;
-	                             break; 
-	                        }
-	                    }
-	                }
-	                if(workOrder.Tax_Code_3__c!=null)
-	                {
-	                    for(c2g__codaTaxRate__c taxRate : taxCodesById.get(workOrder.Tax_Code_3__c).c2g__TaxRates__r)
-	                    {
-	                        if(taxRate.c2g__StartDate__c <= workOrder.Completion_Date__c)
-	                        {
-	                             workOrder.Tax_Rate_3__c = taxRate.c2g__Rate__c;
-	                             break; 
-	                        }
-	                    }
-	                }
-	            }
-		    }
+            // Resolve Tax Codes
+            Date minCompletionDate = null;
+            Date maxCompletionDate = null;
+            Map<ID, ID> taxCodeIds = new Map<ID, ID>();
+            for(Work_Order__c workOrder : Trigger.new)
+            {
+                // Account? 
+                if(workOrder.Customer_Account__c==null)
+                {
+                    // Clear tax codes if no account
+                    workOrder.Tax_Code_1__c = null;
+                    workOrder.Tax_Code_2__c = null;
+                    workOrder.Tax_Code_3__c = null;
+                    continue;           
+                }       
+                
+                // Default Tax Codes from Account
+                Account account = accountById.get(workOrder.Customer_Account__c);
+                workOrder.Tax_Code_1__c = account.c2g__CODATaxCode1__c;
+                workOrder.Tax_Code_2__c = account.c2g__CODATaxCode2__c;
+                workOrder.Tax_Code_3__c = account.c2g__CODATaxCode3__c;
+                // Log Tax Code ID's used
+                if(workOrder.Tax_Code_1__c!=null)
+                    taxCodeIds.put(workOrder.Tax_Code_1__c, workOrder.Tax_Code_1__c);
+                if(workOrder.Tax_Code_2__c!=null)
+                    taxCodeIds.put(workOrder.Tax_Code_2__c, workOrder.Tax_Code_2__c);
+                if(workOrder.Tax_Code_3__c!=null)
+                    taxCodeIds.put(workOrder.Tax_Code_3__c, workOrder.Tax_Code_3__c);
+                    
+                // Establish the range of completion dates in which to calculate tax for this batch
+                if(workOrder.Completion_Date__c!=null)
+                {
+                    if(workOrder.Completion_Date__c < minCompletionDate)
+                        minCompletionDate = workOrder.Completion_Date__c;
+                    if(workOrder.Completion_Date__c > maxCompletionDate)
+                        maxCompletionDate = workOrder.Completion_Date__c;               
+                }
+            }
+            
+            // Load applicable subset of Tax Rates to match against completion dates
+            List<c2g__codaTaxCode__c> taxCodes = 
+                [select Name, Id, 
+                    (select Id, c2g__Rate__c, c2g__StartDate__c From c2g__TaxRates__r
+                        where c2g__StartDate__c >= :minCompletionDate and
+                              c2g__StartDate__c <= :maxCompletionDate 
+                        order by c2g__StartDate__c desc) 
+                    from c2g__codaTaxCode__c
+                    where Id in :taxCodeIds.values()];
+            Map<ID, c2g__codaTaxCode__c> taxCodesById = new Map<ID, c2g__codaTaxCode__c>();
+            for(c2g__codaTaxCode__c taxCode : taxCodes)
+                taxCodesById.put(taxCode.Id, taxCode);
+                
+            // Now caluclate tax rates
+            for(Work_Order__c workOrder : Trigger.new)
+            {
+                // Default to zero 
+                workOrder.Tax_Rate_1__c = 0;
+                workOrder.Tax_Rate_2__c = 0;
+                workOrder.Tax_Rate_3__c = 0;
+                // Account? Or Tax Exempt Accounts?
+                Account account = accountById.get(workOrder.Customer_Account__c);
+                if(account==null || account.c2g__CODASalesTaxStatus__c == 'Exempt')
+                    continue;
+                // Resolve rate according to completion date of work item               
+                if(workOrder.Tax_Code_1__c!=null)
+                {
+                    for(c2g__codaTaxRate__c taxRate : taxCodesById.get(workOrder.Tax_Code_1__c).c2g__TaxRates__r)
+                    {
+                        if(taxRate.c2g__StartDate__c <= workOrder.Completion_Date__c)
+                        {
+                             workOrder.Tax_Rate_1__c = taxRate.c2g__Rate__c;
+                             break; 
+                        }
+                    }
+                }
+                if(workOrder.Tax_Code_2__c!=null)
+                {
+                    for(c2g__codaTaxRate__c taxRate : taxCodesById.get(workOrder.Tax_Code_2__c).c2g__TaxRates__r)
+                    {
+                        if(taxRate.c2g__StartDate__c <= workOrder.Completion_Date__c)
+                        {
+                             workOrder.Tax_Rate_2__c = taxRate.c2g__Rate__c;
+                             break; 
+                        }
+                    }
+                }
+                if(workOrder.Tax_Code_3__c!=null)
+                {
+                    for(c2g__codaTaxRate__c taxRate : taxCodesById.get(workOrder.Tax_Code_3__c).c2g__TaxRates__r)
+                    {
+                        if(taxRate.c2g__StartDate__c <= workOrder.Completion_Date__c)
+                        {
+                             workOrder.Tax_Rate_3__c = taxRate.c2g__Rate__c;
+                             break; 
+                        }
+                    }
+                }
+            }
 		}
     }	
     else if (Trigger.IsAfter)

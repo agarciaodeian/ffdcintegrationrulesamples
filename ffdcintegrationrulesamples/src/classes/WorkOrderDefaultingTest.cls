@@ -289,22 +289,103 @@ private class WorkOrderDefaultingTest
 	}
 	
 	/**
+	 * Create Work Order with an Account with Base Date specified
+	 **/
+	public static testmethod void testAccountBasedDueDate()
+	{
+		// Set VAT current company context 
+		FFUtil.setTestCompany(createTestCompanies().get(VAT_COMPANY_NAME));
+		System.assert(FFUtil.isCurrentCompanyVAT() && FFUtil.isCurrentCompanySalesAndUse()==false);			
+		
+		// Create test Work Order and test defaulted Due Date (from Account)
+		Work_Order__c workOrder = createWorkOrder('Exempt', 'Home', true, Date.newInstance(2010, 1, 1));
+		System.assertEquals(Date.newInstance(2010, 1, 16), workOrder.Due_Date__c);		
+	}
+	
+	/**
+	 * Create Work Order with an Account without Base Date specified and thus inherit from company
+	 **/
+	public static testmethod void testCompanyBasedDueDate()
+	{
+		// Set VAT current company context 
+		FFUtil.setTestCompany(createTestCompanies().get(VAT_COMPANY_NAME));
+		System.assert(FFUtil.isCurrentCompanyVAT() && FFUtil.isCurrentCompanySalesAndUse()==false);			
+		
+		// Create test Work Order and test defaulted Due Date (from Company)
+		Work_Order__c workOrder = createWorkOrder('Exempt', 'Home', false, Date.newInstance(2010, 1, 1));
+		System.assertEquals(Date.newInstance(2010, 1, 31), workOrder.Due_Date__c);		
+		
+	}
+	
+	/**
+	 * Create Work Order and ensure Invoice currency defaulted correctly 
+	 **/
+	public static testmethod void testInvoiceCurrencyDefault()
+	{
+		// Set VAT current company context 
+		FFUtil.setTestCompany(createTestCompanies().get(VAT_COMPANY_NAME));
+		System.assert(FFUtil.isCurrentCompanyVAT() && FFUtil.isCurrentCompanySalesAndUse()==false);			
+		
+		// Create test Work Order and test defaulted Currency
+		Work_Order__c workOrder = createWorkOrder('Exempt', 'Home', false, Date.newInstance(2010, 1, 1));
+		System.assertEquals(workOrder.Invoice_Currency__r.Name, 'USD');		
+	}
+	
+	/**
+	 * Create Work Order and ensure Period defaulted correctly
+	 **/
+	public static testmethod void testDefaultPeriod()
+	{
+		// Set VAT current company context 
+		FFUtil.setTestCompany(createTestCompanies().get(VAT_COMPANY_NAME));
+		System.assert(FFUtil.isCurrentCompanyVAT() && FFUtil.isCurrentCompanySalesAndUse()==false);			
+	
+		/**
+	     * TODO: This test has been removed due to issues setting up Year, see createTestCompanies	     
+		// Create test Work Order and test defaulted Period
+		Work_Order__c workOrder = createWorkOrder('Exempt', 'Home', false, Date.newInstance(2012, 1, 1));
+		System.assertEquals(workOrder.Period__r.Name, '2012/001');
+		 **/				
+	}
+	
+	/**
 	 * Creates a test work order including supporting test data (account, product, tax code and tax rates)
 	 **/
 	private static Work_Order__c createWorkOrder(String salesTaxStatus, String vatStatus)
 	{
+		return createWorkOrder(salesTaxStatus, vatStatus, false, null);
+	}
+		
+	/**
+	 * Creates a test work order including supporting test data (account, product, tax code and tax rates)
+	 **/
+	private static Work_Order__c createWorkOrder(String salesTaxStatus, String vatStatus, Boolean accountBaseDate, Date invoiceDate)
+	{
 		// Create Tax Codes
 		Map<String, c2g__codaTaxCode__c> taxCodes = createTestTaxCodes();
+		
+		// Create Account Currency
+		c2g__codaAccountingCurrency__c usdCurrency = new c2g__codaAccountingCurrency__c();
+		usdCurrency.Name = 'USD';
+		usdCurrency.c2g__DecimalPlaces__c = 2;
+		usdCurrency.CurrencyIsoCode = 'USD';
+		insert usdCurrency;
 		
 		// Create Account
 		Account account = new Account();
 		account.Name = 'Test Account';
+		account.CurrencyIsoCode = 'USD';
 		account.c2g__CODASalesTaxStatus__c = salesTaxStatus;
 		account.c2g__CODATaxCode1__c = taxCodes.get(TAX_CODE_1_NAME).Id;
 		account.c2g__CODATaxCode2__c = taxCodes.get(TAX_CODE_2_NAME).Id;
 		account.c2g__CODATaxCode3__c = taxCodes.get(TAX_CODE_3_NAME).Id;
 		account.c2g__CODAVATStatus__c = vatStatus;
 		account.c2g__CODAOutputVATCode__c = taxCodes.get(TAX_CODE_1_NAME).Id;
+		if(accountBaseDate)
+		{
+			account.c2g__CODABaseDate1__c = FFUtil.BASE_DATE_INVOICE_DATE;
+			account.c2g__CODADaysOffset1__c = 15;					
+		}
 		insert account;
 		
 		// Create Products
@@ -329,6 +410,7 @@ private class WorkOrderDefaultingTest
 		workOrder.Invoiced__c = false;
 		workOrder.Sales_Invoice_Number__c = null;
 		workOrder.Status__c = 'Open';
+		workOrder.Invoice_Date__c = invoiceDate;
 		insert workOrder;
 		
 		// Create Work Order Line Item
@@ -358,7 +440,13 @@ private class WorkOrderDefaultingTest
 				w.Tax_Code_2__r.Name, 
 				w.Tax_Code_2__c, 
 				w.Tax_Code_1__r.Name, 
-				w.Tax_Code_1__c, w.Name, 
+				w.Tax_Code_1__c, w.Name,
+				w.Due_Date__c,
+				w.Invoice_Date__c,
+				w.Period__c,
+				w.Period__r.Name,
+				w.Invoice_Currency__c,
+				w.Invoice_Currency__r.Name,
 				w.Id, 
 					(Select 
 						Tax_Code_1__c, 
@@ -449,19 +537,37 @@ private class WorkOrderDefaultingTest
 		vatCompany.RecordTypeId = vatRecordType.Id; 
 		vatCompany.Name = VAT_COMPANY_NAME;
 		vatCompany.c2g__ECCountryCode__c = 'GB';
-		vatCompany.c2g__VATRegistrationNumber__c = 'VATREG01';		
-		insert vatCompany; 
+		vatCompany.c2g__VATRegistrationNumber__c = 'VATREG01';
+		vatCompany.c2g__CODABaseDate1__c = FFUtil.BASE_DATE_INVOICE_DATE;
+		vatCompany.c2g__CODADaysOffset1__c = 30;		
+		insert vatCompany;
+
+		/** 
+		 * TODO: This causes issues as the test is not isolated from company config of the user running the test
+		 *         and thus becomes dependent on existing org data and current company assignment rules	
+			// Create Year
+			c2g__codaYear__c vatYear = new c2g__codaYear__c();
+			vatYear.Name = '2012';
+			vatYear.c2g__StartDate__c = Date.newInstance(2012, 1, 1);
+			vatYear.c2g__EndDate__c = Date.newInstance(2012, 12, 31);
+			vatYear.c2g__PeriodCalculationBasis__c = 'Month End';
+			vatYear.c2g__NumberOfPeriods__c = 12;
+			vatYear.c2g__OwnerCompany__c = vatCompany.Id;
+			insert vatYear;
+		**/
 		
 		// Create SUT company
 		RecordType sutRecordType = [select Id, Name from RecordType where Name = 'SUT'];
 		c2g__codaCompany__c sutCompany = new c2g__codaCompany__c();
 		sutCompany.RecordTypeId = sutRecordType.Id; 
 		sutCompany.Name = SUT_COMPANY_NAME;		 
+		sutCompany.c2g__CODABaseDate1__c = FFUtil.BASE_DATE_INVOICE_DATE;
+		sutCompany.c2g__CODADaysOffset1__c = 30;		
 		insert sutCompany;
 		
 		// Query company records back		 
 		List<c2g__codaCompany__c> companies =
-			[select Id, Name, RecordType.Name, c2g__TaxCode__c from c2g__codaCompany__c where Id = :sutCompany.Id or Id = :vatCompany.Id];
+			[select Id, Name, RecordType.Name, c2g__TaxCode__c, c2g__CODABaseDate1__c, c2g__CODADaysOffset1__c from c2g__codaCompany__c where Id = :sutCompany.Id or Id = :vatCompany.Id];
 		Map<String, c2g__codaCompany__c> companiesMap = new Map<String, c2g__codaCompany__c>();
 		for(c2g__codaCompany__c company : companies)
 			companiesMap.put(company.Name, company);

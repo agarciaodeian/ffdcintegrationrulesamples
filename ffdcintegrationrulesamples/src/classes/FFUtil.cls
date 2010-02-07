@@ -41,7 +41,9 @@ public class FFUtil
 	
 	// Simple cache of the users current company (do not directly expose this partially loaded object)
 	private static c2g__codaCompany__c s_currentCompany;
+	private static c2g__codaAccountingCurrency__c s_currentCompanyHomeCurrency;  
 	private static List<c2g__codaPeriod__c> s_currentCompanyPeriods;
+	private static Boolean s_multiCurrencyOrganization = UserInfo.isMultiCurrencyOrganization();
 	
 	/**
 	 * Resolve current company for current user
@@ -109,6 +111,34 @@ public class FFUtil
 	}
 	
 	/**
+	 * Return true if the org is setup for Salesforce Multicurrency
+	 **/
+	public static Boolean isMultiCurrencyOrganization() 
+	{
+		return s_multiCurrencyOrganization;
+	}
+	/**
+	 * Returns the current companies home currency ISO code
+	 **/
+	public static String getAccountCurrencyIsoCode(Account account)
+	{
+		// For multi-currency orgs we use the standard Saleforce field
+        if (isMultiCurrencyOrganization())	
+        	return (String) account.get('CurrencyIsoCode'); // Uses Dynamic Apex to avoid package dependency	        
+        // Load Home currency for this company (only one per company allowed)
+        if(s_currentCompanyHomeCurrency==null)
+        {
+	        c2g__codaAccountingCurrency__c[] accountCurrencies = 
+	        	[select Id, Name from c2g__codaAccountingCurrency__c where c2g__Home__c = true and c2g__OwnerCompany__c = :getCurrentCompany().Id];
+	        if(accountCurrencies.size()==0)
+	        	throw new FFUtilException('Current company does not have a home accounting currency defined');
+	        s_currentCompanyHomeCurrency = accountCurrencies[0];
+        }         
+        // For none multi-currency orgs, use the current companies Home currency
+        return s_currentCompanyHomeCurrency.Name;
+	}
+	
+	/**
 	 * Returns the applicable period for the given date?
 	 **/
 	public static ID getPeriodIDByDate(Date periodDate)
@@ -128,11 +158,20 @@ public class FFUtil
 	/**
 	 * Sets a test company and periods (for use during Apex Unit tests only)
 	 **/	
-	public static void setTestCompany(c2g__codaCompany__c company)
+	public static void setTestCompany(c2g__codaCompany__c company, c2g__codaAccountingCurrency__c accountingCurrency)
 	{
 		s_currentCompany = company;
         s_currentCompanyPeriods = 
         	[select Id, c2g__StartDate__c, c2g__EndDate__c, c2g__PeriodNumber__c from c2g__codaPeriod__c where c2g__OwnerCompany__c = :s_currentCompany.Id];
+        s_currentCompanyHomeCurrency = accountingCurrency;
+	}
+	
+	/**
+	 * Sets the test mode to multi or single currency
+	 **/
+	public static void setTestMultiCurrencyOrganization(Boolean multiCurrencyOrganization)
+	{
+		s_multiCurrencyOrganization = multiCurrencyOrganization;
 	}
 
 	/**

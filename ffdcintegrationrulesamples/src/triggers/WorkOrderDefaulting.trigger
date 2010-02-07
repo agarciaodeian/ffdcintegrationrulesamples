@@ -32,16 +32,19 @@ trigger WorkOrderDefaulting on Work_Order__c (before insert, before update, afte
         for(Work_Order__c workOrder : Trigger.new)
             if(workOrder.Customer_Account__c!=null)
                 accountIds.put(workOrder.Customer_Account__c, workOrder.Customer_Account__c);
-        List<Account> accounts = 
-            [select Id, c2g__CODASalesTaxStatus__c, c2g__CODATaxCode1__c, c2g__CODATaxCode2__c, c2g__CODATaxCode3__c,
-            		c2g__CODABaseDate1__c, c2g__CODADaysOffset1__c, CurrencyISOCode 
-                from Account where Id in :accountIds.values()];
+        List<ID> accountIdsList = accountIds.values();
+        String accountSOQL = // Avoid multi-currency dependency on package via dynamic SOQL
+        	'select Id, c2g__CODASalesTaxStatus__c, c2g__CODATaxCode1__c, c2g__CODATaxCode2__c, c2g__CODATaxCode3__c, ' + 
+            ' c2g__CODABaseDate1__c, c2g__CODADaysOffset1__c, CurrencyISOCode ' + 
+            ' from Account where Id in :accountIdsList';
+        List<Account> accounts = Database.query(
+        	FFUtil.isMultiCurrencyOrganization() ? accountSOQL : accountSOQL.replace(', CurrencyISOCode', '')); 
         Map<ID, Account> accountById = new Map<ID, Account>();
-        List<String> isoCodes = new List<String>();
+        Set<String> isoCodes = new Set<String>();
         for(Account account : accounts)
         {
             accountById.put(account.Id, account);
-            isoCodes.add(account.CurrencyISOCode);
+            isoCodes.add(FFUtil.getAccountCurrencyIsoCode(account));
         }
         
         // Load Account Currencies for given Accounts used by Work Orders
@@ -65,8 +68,11 @@ trigger WorkOrderDefaulting on Work_Order__c (before insert, before update, afte
             	Account account = accountById.get(workOrder.Customer_Account__c);
             	// Currency?
             	if(workOrder.Invoice_Currency__c==null)
-            		if(accountCurrencyMap.containsKey(account.CurrencyISOCode))
-            			workOrder.Invoice_Currency__c = accountCurrencyMap.get(account.CurrencyISOCode).Id;
+            	{
+            		String accountCurrencyISOCode = FFUtil.getAccountCurrencyIsoCode(account);
+            		if(accountCurrencyMap.containsKey(accountCurrencyISOCode))
+            			workOrder.Invoice_Currency__c = accountCurrencyMap.get(accountCurrencyISOCode).Id;
+            	}
             	// Caluculate Due Date based on Account?
             	if(account.c2g__CODABaseDate1__c != null)
             	{

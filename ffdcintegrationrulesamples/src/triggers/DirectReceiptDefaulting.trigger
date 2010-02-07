@@ -42,8 +42,11 @@ trigger DirectReceiptDefaulting on Direct_Receipt__c (before insert, before upda
             
             }
                 
-            List<Account> accounts = 
-                [select Id, c2g__CODAPaymentMethod__c, CurrencyIsoCode from Account where Id in :accountIds.values()];
+            List<ID> accountIdsList = accountIds.values();
+            String accountSOQL =  // Avoid multi-currency dependency on package via dynamic SOQL 
+            	'select Id, c2g__CODAPaymentMethod__c, CurrencyIsoCode from Account where Id in :accountIdsList';
+            List<Account> accounts = Database.query(
+            	FFUtil.isMultiCurrencyOrganization() ? accountSOQL : accountSOQL.replace(', CurrencyIsoCode', ''));
             Map<ID, Account> accountById = new Map<ID, Account>();
             for(Account account : accounts)
                 accountById.put(account.Id, account);
@@ -55,7 +58,7 @@ trigger DirectReceiptDefaulting on Direct_Receipt__c (before insert, before upda
                 bankAccountById.put(bankAccount.Id, bankAccount); 
            
             List<c2g__CODAAccountingCurrency__c> accountingCurrencies = 
-                [select Id, CurrencyIsoCode  from c2g__CODAAccountingCurrency__c];
+                [select Id, Name  from c2g__CODAAccountingCurrency__c];
             Map<ID, c2g__CODAAccountingCurrency__c> accountingCurrencyById = new Map<ID, c2g__CODAAccountingCurrency__c>();
            for(c2g__CODAAccountingCurrency__c accountingCurrency : accountingCurrencies)
                 accountingCurrencyById.put(accountingCurrency.Id, accountingCurrency);    
@@ -66,14 +69,14 @@ trigger DirectReceiptDefaulting on Direct_Receipt__c (before insert, before upda
             	if(directReceipt.Bank_Account__c != null)
             	{
             		c2g__CODABankAccount__c bankAccount = bankAccountById.get(directReceipt.Bank_Account__c); 	
-            		directReceipt.Receipt_Currency__c = accountingCurrencyById.get(bankAccount.c2g__BankAccountCurrency__c).CurrencyIsoCode;	
+            		directReceipt.Receipt_Currency__c = accountingCurrencyById.get(bankAccount.c2g__BankAccountCurrency__c).Name;	
             	}
             	
             	if(directReceipt.Customer_Account__c != null)
             	{
             		Account account = accountById.get(directReceipt.Customer_Account__c);
             		directReceipt.Account_Payment_Method__c = account.c2g__CODAPaymentMethod__c;
-            		directReceipt.Payment_Currency__c = account.CurrencyIsoCode;
+            		directReceipt.Payment_Currency__c = FFUtil.getAccountCurrencyIsoCode(account);
             	}
             }
         }

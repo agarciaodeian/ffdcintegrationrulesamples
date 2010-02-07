@@ -43,13 +43,17 @@ private class WorkOrderDefaultingTest
 	/**
 	 * Create empty or potentially invalid work orders, ensure it does not error
 	 **/
-	public static testmethod void robustnessAllNulls()
+	private static void robustnessAllNulls(Boolean multiCurrencyMode)
 	{	
+		// Configure test to control code paths for single/multi currency		
+		FFUtil.setTestMultiCurrencyOrganization(multiCurrencyMode);
+		
 		// Test in both VAT and SUT modes
+		c2g__codaAccountingCurrency__c testCurrency = createCompanyHomeCurrency('USD');
 		for(c2g__codaCompany__c company : createTestCompanies().values())
 		{
 			// Set current company context 
-			FFUtil.setTestCompany(company);
+			FFUtil.setTestCompany(company, testCurrency);
 			// Create empty / invalid work orders
 			Work_Order__c workOrder = new Work_Order__c();
 			insert workOrder;
@@ -62,13 +66,17 @@ private class WorkOrderDefaultingTest
 	/**
 	 * Create empty or potentially invalid work orders, ensure it does not error
 	 **/
-	public static testmethod void robustnessCompletionOnly()
+	private static void robustnessCompletionOnly(Boolean multiCurrencyMode)
 	{	
+		// Configure test to control code paths for single/multi currency
+		FFUtil.setTestMultiCurrencyOrganization(multiCurrencyMode);
+				
 		// Test in both VAT and SUT modes
+		c2g__codaAccountingCurrency__c testCurrency = createCompanyHomeCurrency('USD');
 		for(c2g__codaCompany__c company : createTestCompanies().values())
 		{
 			// Set current company context 
-			FFUtil.setTestCompany(company);
+			FFUtil.setTestCompany(company, testCurrency);
 			// Create empty / invalid work orders
 			Work_Order__c workOrder = new Work_Order__c();
 			workOrder.Completion_Date__c = System.now().date();
@@ -82,18 +90,22 @@ private class WorkOrderDefaultingTest
 	/**
 	 * Create empty or potentially invalid work orders, ensure it does not error
 	 **/
-	public static testmethod void robustnessAccountOnly()
+	private static void robustnessAccountOnly(Boolean multiCurrencyMode)
 	{	
+		// Configure test to control code paths for single/multi currency
+		FFUtil.setTestMultiCurrencyOrganization(multiCurrencyMode);
+				
 		// Create Account
 		Account account = new Account();
 		account.Name = 'Test Account';
 		insert account;
 		
 		// Test in both VAT and SUT modes
+		c2g__codaAccountingCurrency__c testCurrency = createCompanyHomeCurrency('USD');
 		for(c2g__codaCompany__c company : createTestCompanies().values())
 		{
 			// Set current company context 
-			FFUtil.setTestCompany(company);
+			FFUtil.setTestCompany(company, testCurrency);
 			// Create empty / invalid work orders
 			Work_Order__c workOrder = new Work_Order__c();
 			workOrder.Customer_Account__c = account.Id;
@@ -107,10 +119,13 @@ private class WorkOrderDefaultingTest
 	/**
 	 * Create Work Orders in a VAT company context (Taxable Home Account)
 	 **/
-	public static testmethod void testVatWorkOrdersTaxableHomeAccount()
+	private static void testVatWorkOrdersTaxableHomeAccount(Boolean multiCurrencyMode)
 	{
+		// Configure test to control code paths for single/multi currency
+		FFUtil.setTestMultiCurrencyOrganization(multiCurrencyMode);
+				
 		// Set VAT current company context 
-		FFUtil.setTestCompany(createTestCompanies().get(VAT_COMPANY_NAME));
+		FFUtil.setTestCompany(createTestCompanies().get(VAT_COMPANY_NAME), createCompanyHomeCurrency('USD'));
 		System.assert(FFUtil.isCurrentCompanyVAT() && FFUtil.isCurrentCompanySalesAndUse()==false);			
 		
 		// Create test Work Order and test defaulted tax codes and rates
@@ -143,10 +158,13 @@ private class WorkOrderDefaultingTest
 	/**
 	 * Create Work Orders in a VAT company context (Taxable Export Account)
 	 **/
-	public static testmethod void testVatWorkOrdersTaxableExportAccount()
+	private static void testVatWorkOrdersTaxableExportAccount(Boolean multiCurrencyMode)
 	{
+		// Configure test to control code paths for single/multi currency
+		FFUtil.setTestMultiCurrencyOrganization(multiCurrencyMode);
+				
 		// Set VAT current company context 
-		FFUtil.setTestCompany(createTestCompanies().get(VAT_COMPANY_NAME));
+		FFUtil.setTestCompany(createTestCompanies().get(VAT_COMPANY_NAME), createCompanyHomeCurrency('USD'));
 		System.assert(FFUtil.isCurrentCompanyVAT() && FFUtil.isCurrentCompanySalesAndUse()==false);			
 		
 		// Create test Work Order and test defaulted tax codes and rates
@@ -171,10 +189,13 @@ private class WorkOrderDefaultingTest
 	/**
 	 * Create Work Orders in a VAT company context (Exempt Home Account)
 	 **/
-	public static testmethod void testVatWorkOrdersExemptHomeAccount()
+	private static void testVatWorkOrdersExemptHomeAccount(Boolean multiCurrencyMode)
 	{
+		// Configure test to control code paths for single/multi currency
+		FFUtil.setTestMultiCurrencyOrganization(multiCurrencyMode);
+				
 		// Set VAT current company context 
-		FFUtil.setTestCompany(createTestCompanies().get(VAT_COMPANY_NAME));
+		FFUtil.setTestCompany(createTestCompanies().get(VAT_COMPANY_NAME), createCompanyHomeCurrency('USD'));
 		System.assert(FFUtil.isCurrentCompanyVAT() && FFUtil.isCurrentCompanySalesAndUse()==false);			
 		
 		// Create test Work Order and test defaulted tax codes and rates
@@ -207,10 +228,13 @@ private class WorkOrderDefaultingTest
 	/**
 	 * Create Work Orders in a VAT company context (Exempt Export Account)
 	 **/
-	public static testmethod void testVatWorkOrdersExemptExportAccount()
+	private static void testVatWorkOrdersExemptExportAccount(Boolean multiCurrencyMode)
 	{
+		// Configure test to control code paths for single/multi currency
+		FFUtil.setTestMultiCurrencyOrganization(multiCurrencyMode);
+
 		// Set VAT current company context 
-		FFUtil.setTestCompany(createTestCompanies().get(VAT_COMPANY_NAME));
+		FFUtil.setTestCompany(createTestCompanies().get(VAT_COMPANY_NAME), createCompanyHomeCurrency('USD'));
 		System.assert(FFUtil.isCurrentCompanyVAT() && FFUtil.isCurrentCompanySalesAndUse()==false);			
 		
 		// Create test Work Order and test defaulted tax codes and rates
@@ -235,10 +259,13 @@ private class WorkOrderDefaultingTest
 	/**
 	 * Create Work Orders in a SUT company context (Taxable account)
 	 **/
-	public static testmethod void testSutWorkOrdersTaxableAccount()
+	private static void testSutWorkOrdersTaxableAccount(Boolean multiCurrencyMode)
 	{
+		// Configure test to control code paths for single/multi currency
+		FFUtil.setTestMultiCurrencyOrganization(multiCurrencyMode);
+
 		// Set SUT current company context
-		FFUtil.setTestCompany(createTestCompanies().get(SUT_COMPANY_NAME));
+		FFUtil.setTestCompany(createTestCompanies().get(SUT_COMPANY_NAME), createCompanyHomeCurrency('USD'));
 		System.assert(FFUtil.isCurrentCompanySalesAndUse() && FFUtil.isCurrentCompanyVAT()==false);
 		
 		// Create test Work Order and test defaulted tax codes and rates
@@ -263,10 +290,13 @@ private class WorkOrderDefaultingTest
 	/**
 	 * Create Work Orders in a SUT company context (Exempt account)
 	 **/
-	public static testmethod void testSutWorkOrdersExemptAccount()
+	private static void testSutWorkOrdersExemptAccount(Boolean multiCurrencyMode)
 	{
+		// Configure test to control code paths for single/multi currency
+		FFUtil.setTestMultiCurrencyOrganization(multiCurrencyMode);
+
 		// Set SUT current company context
-		FFUtil.setTestCompany(createTestCompanies().get(SUT_COMPANY_NAME));
+		FFUtil.setTestCompany(createTestCompanies().get(SUT_COMPANY_NAME), createCompanyHomeCurrency('USD'));
 		System.assert(FFUtil.isCurrentCompanySalesAndUse() && FFUtil.isCurrentCompanyVAT()==false);
 		
 		// Create test Work Order and test defaulted tax codes and rates
@@ -291,10 +321,13 @@ private class WorkOrderDefaultingTest
 	/**
 	 * Create Work Order with an Account with Base Date specified
 	 **/
-	public static testmethod void testAccountBasedDueDate()
+	private static void testAccountBasedDueDate(Boolean multiCurrencyMode)
 	{
+		// Configure test to control code paths for single/multi currency
+		FFUtil.setTestMultiCurrencyOrganization(multiCurrencyMode);
+
 		// Set VAT current company context 
-		FFUtil.setTestCompany(createTestCompanies().get(VAT_COMPANY_NAME));
+		FFUtil.setTestCompany(createTestCompanies().get(VAT_COMPANY_NAME), createCompanyHomeCurrency('USD'));
 		System.assert(FFUtil.isCurrentCompanyVAT() && FFUtil.isCurrentCompanySalesAndUse()==false);			
 		
 		// Create test Work Order and test defaulted Due Date (from Account)
@@ -305,25 +338,30 @@ private class WorkOrderDefaultingTest
 	/**
 	 * Create Work Order with an Account without Base Date specified and thus inherit from company
 	 **/
-	public static testmethod void testCompanyBasedDueDate()
+	private static void testCompanyBasedDueDate(Boolean multiCurrencyMode)
 	{
+		// Configure test to control code paths for single/multi currency
+		FFUtil.setTestMultiCurrencyOrganization(multiCurrencyMode);
+
 		// Set VAT current company context 
-		FFUtil.setTestCompany(createTestCompanies().get(VAT_COMPANY_NAME));
+		FFUtil.setTestCompany(createTestCompanies().get(VAT_COMPANY_NAME), createCompanyHomeCurrency('USD'));
 		System.assert(FFUtil.isCurrentCompanyVAT() && FFUtil.isCurrentCompanySalesAndUse()==false);			
 		
 		// Create test Work Order and test defaulted Due Date (from Company)
 		Work_Order__c workOrder = createWorkOrder('Exempt', 'Home', false, Date.newInstance(2010, 1, 1));
-		System.assertEquals(Date.newInstance(2010, 1, 31), workOrder.Due_Date__c);		
-		
+		System.assertEquals(Date.newInstance(2010, 1, 31), workOrder.Due_Date__c);				
 	}
 	
 	/**
 	 * Create Work Order and ensure Invoice currency defaulted correctly 
 	 **/
-	public static testmethod void testInvoiceCurrencyDefault()
+	private static void testInvoiceCurrencyDefault(Boolean multiCurrencyMode)
 	{
+		// Configure test to control code paths for single/multi currency
+		FFUtil.setTestMultiCurrencyOrganization(multiCurrencyMode);
+
 		// Set VAT current company context 
-		FFUtil.setTestCompany(createTestCompanies().get(VAT_COMPANY_NAME));
+		FFUtil.setTestCompany(createTestCompanies().get(VAT_COMPANY_NAME), createCompanyHomeCurrency('USD'));
 		System.assert(FFUtil.isCurrentCompanyVAT() && FFUtil.isCurrentCompanySalesAndUse()==false);			
 		
 		// Create test Work Order and test defaulted Currency
@@ -334,10 +372,13 @@ private class WorkOrderDefaultingTest
 	/**
 	 * Create Work Order and ensure Period defaulted correctly
 	 **/
-	public static testmethod void testDefaultPeriod()
+	private static void testDefaultPeriod(Boolean multiCurrencyMode)
 	{
+		// Configure test to control code paths for single/multi currency
+		FFUtil.setTestMultiCurrencyOrganization(multiCurrencyMode);
+
 		// Set VAT current company context 
-		FFUtil.setTestCompany(createTestCompanies().get(VAT_COMPANY_NAME));
+		FFUtil.setTestCompany(createTestCompanies().get(VAT_COMPANY_NAME), createCompanyHomeCurrency('USD'));
 		System.assert(FFUtil.isCurrentCompanyVAT() && FFUtil.isCurrentCompanySalesAndUse()==false);			
 	
 		/**
@@ -364,17 +405,11 @@ private class WorkOrderDefaultingTest
 		// Create Tax Codes
 		Map<String, c2g__codaTaxCode__c> taxCodes = createTestTaxCodes();
 		
-		// Create Account Currency
-		c2g__codaAccountingCurrency__c usdCurrency = new c2g__codaAccountingCurrency__c();
-		usdCurrency.Name = 'USD';
-		usdCurrency.c2g__DecimalPlaces__c = 2;
-		usdCurrency.CurrencyIsoCode = 'USD';
-		insert usdCurrency;
-		
 		// Create Account
 		Account account = new Account();
 		account.Name = 'Test Account';
-		account.CurrencyIsoCode = 'USD';
+		if(UserInfo.isMultiCurrencyOrganization())
+			account.put('CurrencyIsoCode', 'USD');
 		account.c2g__CODASalesTaxStatus__c = salesTaxStatus;
 		account.c2g__CODATaxCode1__c = taxCodes.get(TAX_CODE_1_NAME).Id;
 		account.c2g__CODATaxCode2__c = taxCodes.get(TAX_CODE_2_NAME).Id;
@@ -573,4 +608,249 @@ private class WorkOrderDefaultingTest
 			companiesMap.put(company.Name, company);
 		return companiesMap; 		 
 	}
+	
+	/**
+	 * Create and insert a test Home Accounting Currency
+	 **/
+	private static c2g__codaAccountingCurrency__c createCompanyHomeCurrency(String currencyIsoCode)
+	{		
+		// Create Account Currency
+		c2g__codaAccountingCurrency__c accountingCurrency = new c2g__codaAccountingCurrency__c();
+		accountingCurrency.Name = currencyIsoCode;
+		accountingCurrency.c2g__DecimalPlaces__c = 2;
+		accountingCurrency.c2g__Home__c = true;
+		if(UserInfo.isMultiCurrencyOrganization())
+			accountingCurrency.put('CurrencyIsoCode', currencyIsoCode);
+		insert accountingCurrency;
+		return accountingCurrency;
+	}
+	
+	/******************************************************************
+	 * Multi Currency
+	 ******************************************************************/
+
+	/**
+	 * Create empty or potentially invalid work orders, ensure it does not error
+	 **/
+	public static testmethod void robustnessAllNullsMultiCurrency()
+	{	
+		if(UserInfo.isMultiCurrencyOrganization())
+			robustnessAllNulls(true);
+	}
+
+	/**
+	 * Create empty or potentially invalid work orders, ensure it does not error
+	 **/
+	public static testmethod void robustnessCompletionOnlyMultiCurrency()
+	{	
+		if(UserInfo.isMultiCurrencyOrganization())
+			robustnessCompletionOnly(true);
+	}
+
+	/**
+	 * Create empty or potentially invalid work orders, ensure it does not error
+	 **/
+	public static testmethod void robustnessAccountOnlyMultiCurrency()
+	{
+		if(UserInfo.isMultiCurrencyOrganization())			
+			robustnessAccountOnly(true);
+	}
+	
+	/**
+	 * Create Work Orders in a VAT company context (Taxable Home Account)
+	 **/
+	public static testmethod void testVatWorkOrdersTaxableHomeAccountMultiCurrency()
+	{
+		if(UserInfo.isMultiCurrencyOrganization())		
+			testVatWorkOrdersTaxableHomeAccount(true);
+	}
+
+	/**
+	 * Create Work Orders in a VAT company context (Taxable Export Account)
+	 **/
+	public static testmethod void testVatWorkOrdersTaxableExportAccountMultiCurrency()
+	{
+		if(UserInfo.isMultiCurrencyOrganization())		
+			testVatWorkOrdersTaxableExportAccount(true);
+	}
+
+	/**
+	 * Create Work Orders in a VAT company context (Exempt Home Account)
+	 **/
+	public static testmethod void testVatWorkOrdersExemptHomeAccountMultiCurrency()
+	{
+		if(UserInfo.isMultiCurrencyOrganization())		
+			testVatWorkOrdersExemptHomeAccount(true);
+	}
+
+	/**
+	 * Create Work Orders in a VAT company context (Exempt Export Account)
+	 **/
+	public static testmethod void testVatWorkOrdersExemptExportAccountMultiCurrency()
+	{
+		if(UserInfo.isMultiCurrencyOrganization())		
+			testVatWorkOrdersExemptExportAccount(true);
+	}
+	
+	/**
+	 * Create Work Orders in a SUT company context (Taxable account)
+	 **/
+	public static testmethod void testSutWorkOrdersTaxableAccountMultiCurrency()
+	{
+		if(UserInfo.isMultiCurrencyOrganization())		
+			testSutWorkOrdersTaxableAccount(true);
+	}
+
+	/**
+	 * Create Work Orders in a SUT company context (Exempt account)
+	 **/
+	public static testmethod void testSutWorkOrdersExemptAccountMultiCurrency()
+	{
+		if(UserInfo.isMultiCurrencyOrganization())		
+			testSutWorkOrdersExemptAccount(true);
+	}
+	
+	/**
+	 * Create Work Order with an Account with Base Date specified
+	 **/
+	public static testmethod void testAccountBasedDueDateMultiCurrency()
+	{
+		if(UserInfo.isMultiCurrencyOrganization())		
+			testAccountBasedDueDate(true);
+	}
+	
+	/**
+	 * Create Work Order with an Account without Base Date specified and thus inherit from company
+	 **/
+	public static testmethod void testCompanyBasedDueDateMultiCurrency()
+	{
+		if(UserInfo.isMultiCurrencyOrganization())		
+			testCompanyBasedDueDate(true);
+	}
+	
+	/**
+	 * Create Work Order and ensure Invoice currency defaulted correctly 
+	 **/
+	public static testmethod void testInvoiceCurrencyDefaultMultiCurrency()
+	{
+		if(UserInfo.isMultiCurrencyOrganization())		
+			testInvoiceCurrencyDefault(true);
+	}
+	
+	/**
+	 * Create Work Order and ensure Period defaulted correctly
+	 **/
+	public static testmethod void testDefaultPeriodMultiCurrency()
+	{
+		if(UserInfo.isMultiCurrencyOrganization())		
+			testDefaultPeriod(true);
+	}
+
+	/******************************************************************
+	 * Single Currency
+	 ******************************************************************/
+
+	/**
+	 * Create empty or potentially invalid work orders, ensure it does not error
+	 **/
+	public static testmethod void robustnessAllNullsSingleCurrency()
+	{	
+		robustnessAllNulls(false);
+	}
+
+	/**
+	 * Create empty or potentially invalid work orders, ensure it does not error
+	 **/
+	public static testmethod void robustnessCompletionOnlySingleCurrency()
+	{	
+		robustnessCompletionOnly(false);
+	}
+
+	/**
+	 * Create empty or potentially invalid work orders, ensure it does not error
+	 **/
+	public static testmethod void robustnessAccountOnlySingleCurrency()
+	{	
+		robustnessAccountOnly(false);
+	}
+	
+	/**
+	 * Create Work Orders in a VAT company context (Taxable Home Account)
+	 **/
+	public static testmethod void testVatWorkOrdersTaxableHomeAccountSingleCurrency()
+	{
+		testVatWorkOrdersTaxableHomeAccount(false);
+	}
+
+	/**
+	 * Create Work Orders in a VAT company context (Taxable Export Account)
+	 **/
+	public static testmethod void testVatWorkOrdersTaxableExportAccountSingleCurrency()
+	{
+		testVatWorkOrdersTaxableExportAccount(false);
+	}
+
+	/**
+	 * Create Work Orders in a VAT company context (Exempt Home Account)
+	 **/
+	public static testmethod void testVatWorkOrdersExemptHomeAccountSingleCurrency()
+	{
+		testVatWorkOrdersExemptHomeAccount(false);
+	}
+
+	/**
+	 * Create Work Orders in a VAT company context (Exempt Export Account)
+	 **/
+	public static testmethod void testVatWorkOrdersExemptExportAccountSingleCurrency()
+	{
+		testVatWorkOrdersExemptExportAccount(false);
+	}
+	
+	/**
+	 * Create Work Orders in a SUT company context (Taxable account)
+	 **/
+	public static testmethod void testSutWorkOrdersTaxableAccountSingleCurrency()
+	{
+		testSutWorkOrdersTaxableAccount(false);
+	}
+
+	/**
+	 * Create Work Orders in a SUT company context (Exempt account)
+	 **/
+	public static testmethod void testSutWorkOrdersExemptAccountSingleCurrency()
+	{
+		testSutWorkOrdersExemptAccount(false);
+	}
+	
+	/**
+	 * Create Work Order with an Account with Base Date specified
+	 **/
+	public static testmethod void testAccountBasedDueDateSingleCurrency()
+	{
+		testAccountBasedDueDate(false);
+	}
+	
+	/**
+	 * Create Work Order with an Account without Base Date specified and thus inherit from company
+	 **/
+	public static testmethod void testCompanyBasedDueDateSingleCurrency()
+	{
+		testCompanyBasedDueDate(false);
+	}
+	
+	/**
+	 * Create Work Order and ensure Invoice currency defaulted correctly 
+	 **/
+	public static testmethod void testInvoiceCurrencyDefaultSingleCurrency()
+	{
+		testInvoiceCurrencyDefault(false);
+	}
+	
+	/**
+	 * Create Work Order and ensure Period defaulted correctly
+	 **/
+	public static testmethod void testDefaultPeriodSingleCurrency()
+	{
+		testDefaultPeriod(false);
+	}	
 }

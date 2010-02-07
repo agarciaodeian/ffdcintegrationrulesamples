@@ -27,8 +27,11 @@
 @IsTest
 private class DirectReceiptDefaultingTest 
 {
-	public static testmethod void testDefaults()
+	private static void testDefaults(Boolean multiCurrencyMode)
 	{
+		// Configure test to control code paths for single/multi currency
+		FFUtil.setTestMultiCurrencyOrganization(multiCurrencyMode);
+
 		// TODO: Issue creating an Account Currency in test context without a current company.
 		/*
 		// Create Account
@@ -54,4 +57,16 @@ private class DirectReceiptDefaultingTest
 		Direct_Receipt__c directReceipt = new Direct_Receipt__c();
 		insert directReceipt;
 	}
+	
+	public testmethod static void testDefaultsMultiCurrency()
+	{
+		if(UserInfo.isMultiCurrencyOrganization())		
+			testDefaults(true);
+	}
+	
+	public testmethod static void testDefaultsSingleCurrency()
+	{
+		testDefaults(false);
+	}
+	
 }

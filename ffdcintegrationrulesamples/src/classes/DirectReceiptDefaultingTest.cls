@@ -27,46 +27,46 @@
 @IsTest
 private class DirectReceiptDefaultingTest 
 {
-	private static void testDefaults(Boolean multiCurrencyMode)
-	{
-		// Configure test to control code paths for single/multi currency
-		FFUtil.setTestMultiCurrencyOrganization(multiCurrencyMode);
+    private static void testDefaults(Boolean multiCurrencyMode)
+    {
+        // Configure test to control code paths for single/multi currency
+        FFUtil.setTestMultiCurrencyOrganization(multiCurrencyMode);
 
-		// TODO: Issue creating an Account Currency in test context without a current company.
-		/*
-		// Create Account
-		Account account = new Account();
-		account.Name = 'Test Account';
-		account.c2g__CODAPaymentMethod__c = 'Paper';
-		account.CurrencyIsoCode = 'USD';
-		insert account;
-		
-		// Create Accounting Currency
-		c2g__CODAAccountingCurrency__c accountingCurrency = new c2g__CODAAccountingCurrency__c();
-		accountingCurrency.Name = 'USD';
-		insert accountingCurrency;
-		
-		// Create Bank Account
-		c2g__CODABankAccount__c bankAccount = new c2g__CODABankAccount__c();
-		bankAccount.Name = 'Test Bank Account';
-		bankAccount.c2g__BankAccountCurrency__c = accountingCurrency.Id;
-		insert bankAccount;
-		*/
-		
-		// Insert a Direct Receipt		
-		Direct_Receipt__c directReceipt = new Direct_Receipt__c();
-		insert directReceipt;
-	}
-	
-	public testmethod static void testDefaultsMultiCurrency()
-	{
-		if(UserInfo.isMultiCurrencyOrganization())		
-			testDefaults(true);
-	}
-	
-	public testmethod static void testDefaultsSingleCurrency()
-	{
-		testDefaults(false);
-	}
-	
+        // TODO: Issue creating an Account Currency in test context without a current company.
+        /*
+        // Create Account
+        Account account = new Account();
+        account.Name = 'Test Account';
+        account.c2g__CODAPaymentMethod__c = 'Paper';
+        account.CurrencyIsoCode = 'USD';
+        insert account;
+        
+        // Create Accounting Currency
+        c2g__CODAAccountingCurrency__c accountingCurrency = new c2g__CODAAccountingCurrency__c();
+        accountingCurrency.Name = 'USD';
+        insert accountingCurrency;
+        
+        // Create Bank Account
+        c2g__CODABankAccount__c bankAccount = new c2g__CODABankAccount__c();
+        bankAccount.Name = 'Test Bank Account';
+        bankAccount.c2g__BankAccountCurrency__c = accountingCurrency.Id;
+        insert bankAccount;
+        */
+        
+        // Insert a Direct Receipt      
+        Direct_Receipt__c directReceipt = new Direct_Receipt__c();
+        insert directReceipt;
+    }
+    
+    public testmethod static void testDefaultsMultiCurrency()
+    {
+        if(UserInfo.isMultiCurrencyOrganization())      
+            testDefaults(true);
+    }
+    
+    public testmethod static void testDefaultsSingleCurrency()
+    {
+        testDefaults(false);
+    }
+    
 }

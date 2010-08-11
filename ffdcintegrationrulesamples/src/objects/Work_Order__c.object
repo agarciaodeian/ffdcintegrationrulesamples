@@ -1,5 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <actionOverrides>
+        <actionName>Accept</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Clone</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Delete</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Edit</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>List</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>New</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Tab</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>View</actionName>
+        <type>Default</type>
+    </actionOverrides>
     <deploymentStatus>Deployed</deploymentStatus>
     <description>Consulting Work Order Custom Object (Not a standard FinancialForce Object)</description>
     <enableActivities>true</enableActivities>
@@ -62,12 +94,22 @@
         <type>Date</type>
     </fields>
     <fields>
-        <fullName>Gross_Value__c</fullName>
-        <label>Gross Value</label>
-        <summarizedField>Work_Order_Line_Item__c.Gross_Value__c</summarizedField>
-        <summaryForeignKey>Work_Order_Line_Item__c.Work_Order__c</summaryForeignKey>
-        <summaryOperation>sum</summaryOperation>
-        <type>Summary</type>
+        <fullName>Due_Date__c</fullName>
+        <label>Due Date</label>
+        <type>Date</type>
+    </fields>
+    <fields>
+        <fullName>Invoice_Currency__c</fullName>
+        <label>Invoice Currency</label>
+        <referenceTo>c2g__codaAccountingCurrency__c</referenceTo>
+        <relationshipLabel>Work Orders</relationshipLabel>
+        <relationshipName>Work_Orders</relationshipName>
+        <type>Lookup</type>
+    </fields>
+    <fields>
+        <fullName>Invoice_Date__c</fullName>
+        <label>Invoice Date</label>
+        <type>Date</type>
     </fields>
     <fields>
         <fullName>Invoiced__c</fullName>
@@ -83,6 +125,14 @@
         <summaryForeignKey>Work_Order_Line_Item__c.Work_Order__c</summaryForeignKey>
         <summaryOperation>sum</summaryOperation>
         <type>Summary</type>
+    </fields>
+    <fields>
+        <fullName>Period__c</fullName>
+        <label>Period</label>
+        <referenceTo>c2g__codaPeriod__c</referenceTo>
+        <relationshipLabel>Work Orders</relationshipLabel>
+        <relationshipName>Work_Orders</relationshipName>
+        <type>Lookup</type>
     </fields>
     <fields>
         <fullName>Sales_Invoice_Number__c</fullName>
@@ -114,83 +164,6 @@
         </picklist>
         <type>Picklist</type>
     </fields>
-    <fields>
-        <fullName>Tax_Code_1__c</fullName>
-        <label>Tax Code 1</label>
-        <referenceTo>c2g__codaTaxCode__c</referenceTo>
-        <relationshipLabel>Work Orders</relationshipLabel>
-        <relationshipName>Work_Orders</relationshipName>
-        <type>Lookup</type>
-    </fields>
-    <fields>
-        <fullName>Tax_Code_2__c</fullName>
-        <label>Tax Code 2</label>
-        <referenceTo>c2g__codaTaxCode__c</referenceTo>
-        <relationshipLabel>Work Orders (Tax Code 2)</relationshipLabel>
-        <relationshipName>Work_Orders1</relationshipName>
-        <type>Lookup</type>
-    </fields>
-    <fields>
-        <fullName>Tax_Code_3__c</fullName>
-        <label>Tax Code 3</label>
-        <referenceTo>c2g__codaTaxCode__c</referenceTo>
-        <relationshipLabel>Work Orders (Tax Code 3)</relationshipLabel>
-        <relationshipName>Work_Orders2</relationshipName>
-        <type>Lookup</type>
-    </fields>
-    <fields>
-        <fullName>Tax_Rate_1__c</fullName>
-        <label>Tax Rate 1</label>
-        <precision>7</precision>
-        <scale>3</scale>
-        <type>Number</type>
-    </fields>
-    <fields>
-        <fullName>Tax_Rate_2__c</fullName>
-        <label>Tax Rate 2</label>
-        <precision>7</precision>
-        <scale>3</scale>
-        <type>Number</type>
-    </fields>
-    <fields>
-        <fullName>Tax_Rate_3__c</fullName>
-        <label>Tax Rate 3</label>
-        <precision>7</precision>
-        <scale>3</scale>
-        <type>Number</type>
-    </fields>
-    <fields>
-        <fullName>Tax_Value_1__c</fullName>
-        <label>Tax Value 1</label>
-        <summarizedField>Work_Order_Line_Item__c.Tax_Value_1__c</summarizedField>
-        <summaryForeignKey>Work_Order_Line_Item__c.Work_Order__c</summaryForeignKey>
-        <summaryOperation>sum</summaryOperation>
-        <type>Summary</type>
-    </fields>
-    <fields>
-        <fullName>Tax_Value_2__c</fullName>
-        <label>Tax Value 2</label>
-        <summarizedField>Work_Order_Line_Item__c.Tax_Value_2__c</summarizedField>
-        <summaryForeignKey>Work_Order_Line_Item__c.Work_Order__c</summaryForeignKey>
-        <summaryOperation>sum</summaryOperation>
-        <type>Summary</type>
-    </fields>
-    <fields>
-        <fullName>Tax_Value_3__c</fullName>
-        <label>Tax Value 3</label>
-        <summarizedField>Work_Order_Line_Item__c.Tax_Value_3__c</summarizedField>
-        <summaryForeignKey>Work_Order_Line_Item__c.Work_Order__c</summaryForeignKey>
-        <summaryOperation>sum</summaryOperation>
-        <type>Summary</type>
-    </fields>
-    <fields>
-        <fullName>Total_Tax__c</fullName>
-        <label>Total Tax</label>
-        <summarizedField>Work_Order_Line_Item__c.Total_Tax__c</summarizedField>
-        <summaryForeignKey>Work_Order_Line_Item__c.Work_Order__c</summaryForeignKey>
-        <summaryOperation>sum</summaryOperation>
-        <type>Summary</type>
-    </fields>
     <label>Work Order</label>
     <listViews>
         <fullName>All</fullName>
@@ -215,18 +188,7 @@
         <columns>NAME</columns>
         <columns>Customer_Account__c</columns>
         <columns>CURRENCY_ISO_CODE</columns>
-        <columns>Tax_Code_1__c</columns>
-        <columns>Tax_Code_2__c</columns>
-        <columns>Tax_Code_3__c</columns>
-        <columns>Tax_Rate_1__c</columns>
-        <columns>Tax_Rate_2__c</columns>
-        <columns>Tax_Rate_3__c</columns>
-        <columns>Tax_Value_1__c</columns>
-        <columns>Tax_Value_2__c</columns>
-        <columns>Tax_Value_3__c</columns>
         <columns>Net_Value__c</columns>
-        <columns>Total_Tax__c</columns>
-        <columns>Gross_Value__c</columns>
         <filterScope>Everything</filterScope>
         <label>Works Order Values</label>
     </listViews>

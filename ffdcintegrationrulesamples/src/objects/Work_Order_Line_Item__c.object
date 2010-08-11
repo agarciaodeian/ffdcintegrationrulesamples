@@ -1,18 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <actionOverrides>
+        <actionName>Accept</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Clone</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Delete</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Edit</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>List</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>New</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Tab</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>View</actionName>
+        <type>Default</type>
+    </actionOverrides>
     <deploymentStatus>Deployed</deploymentStatus>
     <description>Detail Lines for Consulting Work Orders</description>
     <enableActivities>true</enableActivities>
     <enableReports>true</enableReports>
-    <fields>
-        <fullName>Gross_Value__c</fullName>
-        <formula>Net_Value__c  +  Total_Tax__c</formula>
-        <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
-        <label>Gross Value</label>
-        <precision>18</precision>
-        <scale>2</scale>
-        <type>Number</type>
-    </fields>
     <fields>
         <fullName>Hourly_Rate__c</fullName>
         <label>Hourly Rate</label>
@@ -43,87 +66,6 @@
         <relationshipLabel>Work Order Line Items</relationshipLabel>
         <relationshipName>Work_Order_Line_Items</relationshipName>
         <type>Lookup</type>
-    </fields>
-    <fields>
-        <fullName>Tax_Code_1__c</fullName>
-        <label>Tax Code 1</label>
-        <referenceTo>c2g__codaTaxCode__c</referenceTo>
-        <relationshipLabel>Work Order Line Items</relationshipLabel>
-        <relationshipName>Work_Order_Line_Items</relationshipName>
-        <type>Lookup</type>
-    </fields>
-    <fields>
-        <fullName>Tax_Code_2__c</fullName>
-        <label>Tax Code 2</label>
-        <referenceTo>c2g__codaTaxCode__c</referenceTo>
-        <relationshipLabel>Work Order Line Items (Tax Code 2)</relationshipLabel>
-        <relationshipName>Work_Order_Line_Items1</relationshipName>
-        <type>Lookup</type>
-    </fields>
-    <fields>
-        <fullName>Tax_Code_3__c</fullName>
-        <label>Tax Code 3</label>
-        <referenceTo>c2g__codaTaxCode__c</referenceTo>
-        <relationshipLabel>Work Order Line Items (Tax Code 3)</relationshipLabel>
-        <relationshipName>Work_Order_Line_Items2</relationshipName>
-        <type>Lookup</type>
-    </fields>
-    <fields>
-        <fullName>Tax_Rate_1__c</fullName>
-        <label>Tax Rate 1</label>
-        <precision>7</precision>
-        <scale>3</scale>
-        <type>Number</type>
-    </fields>
-    <fields>
-        <fullName>Tax_Rate_2__c</fullName>
-        <label>Tax Rate 2</label>
-        <precision>7</precision>
-        <scale>3</scale>
-        <type>Number</type>
-    </fields>
-    <fields>
-        <fullName>Tax_Rate_3__c</fullName>
-        <label>Tax Rate 3</label>
-        <precision>7</precision>
-        <scale>3</scale>
-        <type>Number</type>
-    </fields>
-    <fields>
-        <fullName>Tax_Value_1__c</fullName>
-        <formula>Round( Net_Value__c * ( Tax_Rate_1__c / 100), 2)</formula>
-        <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
-        <label>Tax Value 1</label>
-        <precision>18</precision>
-        <scale>2</scale>
-        <type>Number</type>
-    </fields>
-    <fields>
-        <fullName>Tax_Value_2__c</fullName>
-        <formula>Round( Net_Value__c * ( Tax_Rate_2__c / 100), 2)</formula>
-        <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
-        <label>Tax Value 2</label>
-        <precision>18</precision>
-        <scale>2</scale>
-        <type>Number</type>
-    </fields>
-    <fields>
-        <fullName>Tax_Value_3__c</fullName>
-        <formula>Round( Net_Value__c * ( Tax_Rate_3__c / 100), 2)</formula>
-        <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
-        <label>Tax Value 3</label>
-        <precision>18</precision>
-        <scale>2</scale>
-        <type>Number</type>
-    </fields>
-    <fields>
-        <fullName>Total_Tax__c</fullName>
-        <formula>Tax_Value_1__c +  Tax_Value_2__c + Tax_Value_3__c</formula>
-        <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
-        <label>Total Tax</label>
-        <precision>18</precision>
-        <scale>2</scale>
-        <type>Number</type>
     </fields>
     <fields>
         <fullName>Work_Order__c</fullName>

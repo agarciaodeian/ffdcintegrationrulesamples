@@ -1,0 +1,1 @@
+Sample objects and triggers for use with Integration Rule features. This sample illustrates how to automatically default certain required fields, such as Tax Code, Tax Rate, Currency, Period and Due Date.
